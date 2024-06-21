@@ -9,7 +9,8 @@
 //! ```
 #![allow(deprecated)] // We recommend migrating to poise, instead of using the standard command framework.
 mod commands;
-
+mod db;
+mod model;
 use std::collections::HashSet;
 use std::env;
 use std::sync::Arc;
@@ -24,6 +25,7 @@ use serenity::model::event::ResumedEvent;
 use serenity::model::gateway::Ready;
 use serenity::prelude::*;
 use tracing::{error, info};
+use db::DB;
 
 use crate::commands::math::*;
 
