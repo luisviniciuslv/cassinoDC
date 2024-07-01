@@ -220,6 +220,7 @@ dependencies = [
  "dotenv",
  "lazy_static",
  "mongodb",
+ "rand",
  "serde",
  "serenity",
  "tokio",

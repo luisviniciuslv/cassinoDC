@@ -41,7 +41,7 @@ pub async fn create_user(user_id: &str) -> Result<UserModel> {
     let user = user_collection.find_one(doc! {"_id": user_id}, None).await?;
     if user.is_none() {
         let user = UserModel {
-            id: user_id.to_string(),
+            _id: user_id.to_string(),
             coins: 0,
         };
         
@@ -70,19 +70,16 @@ pub async fn get_user(user_id: &str) -> Result<UserModel> {
     }
 }
 
-pub async fn update_user(user_id: &str, field: &str, value: i32) -> Result<UserModel> {
+pub async fn update_coins(user_id: &str, coins: i32) -> Result<UserModel>{
     let user_collection: Collection<Document> = USER_COLLECTION.lock().unwrap().clone().unwrap();
-    let user = get_user(user_id).await?;
-    let updated_user = UserModel {
-        id: user_id.to_string(),
-        coins: value,
-    };
+    let user = user_collection.find_one(doc! {"_id": user_id}, None).await?;
 
-    user_collection.update_one(
-        doc! {"_id": user_id},
-        doc! {"$set": {field: value}},
-        None,
-    ).await?;
-
-    Ok(updated_user)
+    if let Some(user_doc) = user {
+        let mut user: UserModel = from_document(user_doc)?;
+        user.coins += coins;
+        user_collection.update_one(doc! {"_id": user.clone()._id}, doc! {"$set": doc! {"coins": user.clone().coins}}, None).await?;
+        Ok(user)
+    } else {
+        create_user(user_id).await
+    }
 }

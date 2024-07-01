@@ -49,7 +49,7 @@ impl EventHandler for Handler {
 }
 
 #[group]
-#[commands(hello)]
+#[commands(par)]
 struct General;
 
 #[tokio::main]
