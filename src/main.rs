@@ -11,6 +11,7 @@
 mod commands;
 mod db;
 mod model;
+
 use std::collections::HashSet;
 use std::env;
 use std::sync::Arc;
@@ -25,9 +26,8 @@ use serenity::model::event::ResumedEvent;
 use serenity::model::gateway::Ready;
 use serenity::prelude::*;
 use tracing::{error, info};
-use db::DB;
 
-use crate::commands::math::*;
+use crate::commands::teste::*;
 
 pub struct ShardManagerContainer;
 
@@ -49,11 +49,12 @@ impl EventHandler for Handler {
 }
 
 #[group]
-#[commands(multiply)]
+#[commands(hello)]
 struct General;
 
 #[tokio::main]
 async fn main() {
+    db::init().await.expect("Failed to connect to database");
     // This will load the environment variables located at `./.env`, relative to the CWD.
     // See `./.env.example` for an example on how to structure this.
     dotenv::dotenv().expect("Failed to load .env file");
@@ -82,11 +83,12 @@ async fn main() {
 
     // Create the framework
     let framework = StandardFramework::new().group(&GENERAL_GROUP);
-    framework.configure(Configuration::new().owners(owners).prefix("~"));
+    framework.configure(Configuration::new().owners(owners).prefix("!"));
 
     let intents = GatewayIntents::GUILD_MESSAGES
         | GatewayIntents::DIRECT_MESSAGES
         | GatewayIntents::MESSAGE_CONTENT;
+
     let mut client = Client::builder(&token, intents)
         .framework(framework)
         .event_handler(Handler)
