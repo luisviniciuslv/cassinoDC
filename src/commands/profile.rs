@@ -11,9 +11,10 @@ use serenity::prelude::*;
 #[command]
 pub async fn profile(ctx: &Context, msg: &Message,  mut args: Args) -> Result<(), Box<dyn Error + Send + Sync>> {
   let mention = args.single::<String>().unwrap_or_default();
-  println!("{mention}");
+
   let user_id;
   let user;
+
   if mention.is_empty() {
     user_id = msg.author.id.to_string();
     user = msg.author.clone();
@@ -36,8 +37,10 @@ pub async fn profile(ctx: &Context, msg: &Message,  mut args: Args) -> Result<()
       .embed(embed);
 
   let msg = msg.channel_id.send_message(&ctx.http, builder).await;
+
   if let Err(why) = msg {
     println!("Error sending message: {why:?}");
   }
+
     Ok(())
 }
