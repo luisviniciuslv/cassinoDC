@@ -80,6 +80,8 @@ pub async fn update_coins(user_id: &str, coins: i32) -> Result<UserModel>{
         user_collection.update_one(doc! {"_id": user.clone()._id}, doc! {"$set": doc! {"coins": user.clone().coins}}, None).await?;
         Ok(user)
     } else {
-        create_user(user_id).await
+        create_user(user_id).await?;
+
+        Box::pin(update_coins(user_id, coins)).await
     }
 }

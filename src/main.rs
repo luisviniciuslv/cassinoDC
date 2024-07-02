@@ -16,6 +16,10 @@ use std::collections::HashSet;
 use std::env;
 use std::sync::Arc;
 
+use serenity::all::standard::buckets::LimitedFor;
+use serenity::all::standard::macros::hook;
+use serenity::all::standard::BucketBuilder;
+use serenity::all::Message;
 use serenity::async_trait;
 use serenity::framework::standard::macros::group;
 use serenity::framework::standard::Configuration;
@@ -26,8 +30,11 @@ use serenity::model::event::ResumedEvent;
 use serenity::model::gateway::Ready;
 use serenity::prelude::*;
 use tracing::{error, info};
+use serenity::model::id::UserId;
 
 use crate::commands::teste::*;
+use crate::commands::profile::*;
+use crate::commands::adm::*;
 
 pub struct ShardManagerContainer;
 
@@ -49,7 +56,7 @@ impl EventHandler for Handler {
 }
 
 #[group]
-#[commands(par)]
+#[commands(par, profile, add_coins)]
 struct General;
 
 #[tokio::main]
@@ -71,9 +78,11 @@ async fn main() {
     // We will fetch your bot's owners and id
     let (owners, _bot_id) = match http.get_current_application_info().await {
         Ok(info) => {
+            
             let mut owners = HashSet::new();
             if let Some(owner) = &info.owner {
                 owners.insert(owner.id);
+                owners.insert(UserId::new(597492835662692371));
             }
 
             (owners, info.id)
@@ -82,7 +91,13 @@ async fn main() {
     };
 
     // Create the framework
-    let framework = StandardFramework::new().group(&GENERAL_GROUP);
+    let framework = StandardFramework::new().group(&GENERAL_GROUP).bucket("req",
+    BucketBuilder::default().limit(1).time_span(120).delay(5)
+        // The target each bucket will apply to.
+        .limit_for(LimitedFor::User)
+        // A function to call when a rate limit leads to a delay.
+        .delay_action(delay_action)).await;
+
     framework.configure(Configuration::new().owners(owners).prefix("!"));
 
     let intents = GatewayIntents::GUILD_MESSAGES
@@ -110,4 +125,10 @@ async fn main() {
     if let Err(why) = client.start().await {
         error!("Client error: {:?}", why);
     }
+}
+
+#[hook]
+async fn delay_action(ctx: &Context, msg: &Message) {
+    // You may want to handle a Discord rate limit if this fails.
+    let _ = msg.react(ctx, '⏱').await;
 }
