@@ -16,8 +16,8 @@ pub async fn add_coins(ctx: &Context, msg: &Message, mut args: Args) -> CommandR
   update_coins(user_id.to_string().as_str(), coins).await?;
 
   msg.channel_id
-      .say(&ctx.http, format!("Coins adicionados com sucesso para o usuário {}", user.mention()))
-      .await?;
+    .say(&ctx.http, format!("Coins adicionados com sucesso para o usuário {}", user.mention()))
+    .await?;
 
   Ok(())
 }

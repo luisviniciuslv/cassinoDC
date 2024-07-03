@@ -27,14 +27,14 @@ pub async fn profile(ctx: &Context, msg: &Message,  mut args: Args) -> Result<()
   let footer = CreateEmbedFooter::new("ヾ(￣▽￣)").icon_url(user.face());
 
   let embed = CreateEmbed::new()
-      .title(user.name.clone())
-      .description(format!("Perfil do {}", user.name.clone()))
-      .field("Coins", user_db.coins.to_string(), true)
-      .footer(footer)
-      .timestamp(Timestamp::now());
+    .title(user.name.clone())
+    .description(format!("Perfil do {}", user.name.clone()))
+    .field("Coins", user_db.coins.to_string(), true)
+    .footer(footer)
+    .timestamp(Timestamp::now());
 
   let builder = CreateMessage::new()
-      .embed(embed);
+    .embed(embed);
 
   let msg = msg.channel_id.send_message(&ctx.http, builder).await;
 
