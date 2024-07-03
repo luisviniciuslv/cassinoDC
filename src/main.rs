@@ -19,6 +19,10 @@ use std::sync::Arc;
 use serenity::all::standard::buckets::LimitedFor;
 use serenity::all::standard::macros::hook;
 use serenity::all::standard::BucketBuilder;
+use serenity::all::CreateInteractionResponse;
+use serenity::all::CreateInteractionResponseMessage;
+use serenity::all::GuildId;
+use serenity::all::Interaction;
 use serenity::all::Message;
 use serenity::async_trait;
 use serenity::framework::standard::macros::group;
@@ -32,7 +36,7 @@ use serenity::prelude::*;
 use tracing::{error, info};
 use serenity::model::id::UserId;
 
-use crate::commands::teste::*;
+use crate::commands::impar_par::*;
 use crate::commands::profile::*;
 use crate::commands::adm::*;
 
@@ -46,8 +50,38 @@ struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
-  async fn ready(&self, _: Context, ready: Ready) {
+  async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
+    if let Interaction::Command(command) = interaction {
+      let content = match command.data.name.as_str() {
+        "rec" => Some(commands::rec::run(&command.data.options())),
+        _ => Some("not implemented :(".to_string())
+      };
+
+      if let Some(content) = content {
+        let data = CreateInteractionResponseMessage::new().content(content);
+        let builder = CreateInteractionResponse::Message(data);
+        if let Err(why) = command.create_response(&ctx.http, builder).await {
+          println!("Cannot respond to slash command: {why}");
+        }
+      }
+    }
+  }
+
+  async fn ready(&self, ctx: Context, ready: Ready) {
     info!("Connected as {}", ready.user.name);
+    
+    let guild_id = GuildId::new(1048416271747780650);
+    let commands = guild_id.set_commands(&ctx.http, vec![
+      commands::rec::register()
+    ]).await;
+  
+    println!("I now have the following guild slash commands: {commands:#?}");
+
+    // let guild_command =
+    //     Command::create_global_command(&ctx.http, commands::rec::register())
+    //         .await;
+
+    // println!("I created the following global slash command: {guild_command:#?}");
   }
 
   async fn resume(&self, _: Context, _: ResumedEvent) {
@@ -56,26 +90,21 @@ impl EventHandler for Handler {
 }
 
 #[group]
-#[commands(par, profile, add_coins)]
+#[commands(pi, profile, add_coins)]
 struct General;
 
 #[tokio::main]
 async fn main() {
   db::init().await.expect("Failed to connect to database");
-  // This will load the environment variables located at `./.env`, relative to the CWD.
-  // See `./.env.example` for an example on how to structure this.
+
   dotenv::dotenv().expect("Failed to load .env file");
 
-  // Initialize the logger to use environment variables.
-  //
-  // In this case, a good default is setting the environment variable `RUST_LOG` to `debug`.
   tracing_subscriber::fmt::init();
 
   let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
 
   let http = Http::new(&token);
 
-  // We will fetch your bot's owners and id
   let (owners, _bot_id) = match http.get_current_application_info().await {
     Ok(info) => {
       let mut owners = HashSet::new();
@@ -91,11 +120,12 @@ async fn main() {
 
   // Create the framework
   let framework = StandardFramework::new().group(&GENERAL_GROUP).bucket("req",
-  BucketBuilder::default().limit(1).time_span(120).delay(5)
-    // The target each bucket will apply to.
+  BucketBuilder::default().limit(1).time_span(5).delay(5)
+    .await_ratelimits(0)
     .limit_for(LimitedFor::User)
-    // A function to call when a rate limit leads to a delay.
-    .delay_action(delay_action)).await;
+    .delay_action(|ctx, msg| {
+      Box::pin(delay_action(ctx, msg))
+    })).await;
 
   framework.configure(Configuration::new().owners(owners).prefix("!"));
 
@@ -129,5 +159,5 @@ async fn main() {
 #[hook]
 async fn delay_action(ctx: &Context, msg: &Message) {
   // You may want to handle a Discord rate limit if this fails.
-  let _ = msg.react(ctx, '⏱').await;
+  msg.reply(ctx, "I told you that you can't call this command less than every 10 seconds!").await.unwrap();
 }
