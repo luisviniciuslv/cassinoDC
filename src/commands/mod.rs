@@ -1,4 +1,3 @@
-pub mod impar_par;
+pub mod par_ou_impar;
 pub mod profile;
 pub mod adm;
-pub mod rec;

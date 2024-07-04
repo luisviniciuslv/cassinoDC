@@ -1,13 +1,4 @@
-//! Requires the 'framework' feature flag be enabled in your project's `Cargo.toml`.
-//!
-//! This can be enabled by specifying the feature in the dependency section:
-//!
-//! ```toml
-//! [dependencies.serenity]
-//! git = "https://github.com/serenity-rs/serenity.git"
-//! features = ["framework", "standard_framework"]
-//! ```
-#![allow(deprecated)] // We recommend migrating to poise, instead of using the standard command framework.
+#![allow(deprecated)]
 mod commands;
 mod db;
 mod model;
@@ -35,8 +26,6 @@ use serenity::model::gateway::Ready;
 use serenity::prelude::*;
 use tracing::{error, info};
 use serenity::model::id::UserId;
-
-use crate::commands::impar_par::*;
 use crate::commands::profile::*;
 use crate::commands::adm::*;
 
@@ -51,9 +40,11 @@ struct Handler;
 #[async_trait]
 impl EventHandler for Handler {
   async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
+    let cloned_interaction = interaction.clone();
     if let Interaction::Command(command) = interaction {
-      let content = match command.data.name.as_str() {
-        "rec" => Some(commands::rec::run(&command.data.options())),
+      let data = command.data.clone();
+      let content = match data.name.as_str() {
+        "poi" => Some(commands::par_ou_impar::run(cloned_interaction).await),
         _ => Some("not implemented :(".to_string())
       };
 
@@ -72,7 +63,7 @@ impl EventHandler for Handler {
     
     let guild_id = GuildId::new(1048416271747780650);
     let commands = guild_id.set_commands(&ctx.http, vec![
-      commands::rec::register()
+      commands::par_ou_impar::register()
     ]).await;
   
     println!("I now have the following guild slash commands: {commands:#?}");
@@ -90,7 +81,7 @@ impl EventHandler for Handler {
 }
 
 #[group]
-#[commands(pi, profile, add_coins)]
+#[commands(profile, add_coins)]
 struct General;
 
 #[tokio::main]
