@@ -11,7 +11,7 @@ pub async fn add_coins(ctx: &Context, msg: &Message, mut args: Args) -> CommandR
   user_id = user_id.replace("<@", "").replace(">", "").replace("!", "").replace(" ", "");
   println!("user_id: {}", user_id);
   let user: Member = msg.guild_id.unwrap().member(&ctx.http, UserId::new(user_id.parse::<u64>().unwrap())).await?;
-  let coins = args.single::<String>()?.parse::<i32>()?;
+  let coins = args.single::<String>()?.parse::<i64>()?;
 
   update_coins(user_id.to_string().as_str(), coins).await?;
 
