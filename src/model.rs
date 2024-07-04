@@ -4,5 +4,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UserModel {
   pub _id: String,
-  pub coins: i64
+  pub coins: i64,
+  pub last_reward: i64
 }
