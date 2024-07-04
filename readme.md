@@ -1,4 +1,4 @@
-# Bot de Cassino Discord em Rust (Serenity + MongoDB)
+# Bot no Discord em Rust (Serenity + MongoDB)
 
 Este repositório documenta meu aprendizado em Rust através da criação de um bot de cassino para Discord. O bot utilizará a biblioteca Serenity para interagir com o Discord e o MongoDB para armazenar dados (como saldo de moedas dos jogadores).
 
