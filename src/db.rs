@@ -6,7 +6,7 @@ use mongodb::{options::ClientOptions, Client, Collection};
 use mongodb::error::Result;
 use std::sync::Mutex;
 use mongodb::bson::to_bson;
-use mongodb::bson::from_document; // Add this import
+use mongodb::bson::from_document;
 
 
 lazy_static! {
@@ -70,7 +70,7 @@ pub async fn get_user(user_id: &str) -> Result<UserModel> {
   }
 }
 
-pub async fn update_coins(user_id: &str, coins: i32) -> Result<UserModel>{
+pub async fn update_coins(user_id: &str, coins: i64) -> Result<UserModel>{
   let user_collection: Collection<Document> = USER_COLLECTION.lock().unwrap().clone().unwrap();
   let user = user_collection.find_one(doc! {"_id": user_id}, None).await?;
 
