@@ -27,7 +27,7 @@ O desenvolvimento será incremental e guiado por issues. Cada nova funcionalidad
 
 ### Contribuições
 
-Contribuições não são o foco principal deste repositório, já que o objetivo é meu aprendizado pessoal. No entanto, sugestões e correções são bem-vindas através das issues.
+Sugestões e correções são bem-vindas através das issues.
 
 ### Observações
 
