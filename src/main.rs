@@ -28,6 +28,7 @@ use tracing::{error, info};
 use serenity::model::id::UserId;
 use crate::commands::profile::*;
 use crate::commands::adm::*;
+use crate::commands::rec::*;
 
 pub struct ShardManagerContainer;
 
@@ -81,7 +82,7 @@ impl EventHandler for Handler {
 }
 
 #[group]
-#[commands(profile, add_coins)]
+#[commands(profile, add_coins, rec)]
 struct General;
 
 #[tokio::main]
@@ -111,7 +112,7 @@ async fn main() {
 
   // Create the framework
   let framework = StandardFramework::new().group(&GENERAL_GROUP).bucket("req",
-  BucketBuilder::default().limit(1).time_span(5).delay(5)
+  BucketBuilder::default().limit(1).time_span(300).delay(300)
     .await_ratelimits(0)
     .limit_for(LimitedFor::User)
     .delay_action(|ctx, msg| {
@@ -150,5 +151,5 @@ async fn main() {
 #[hook]
 async fn delay_action(ctx: &Context, msg: &Message) {
   // You may want to handle a Discord rate limit if this fails.
-  msg.reply(ctx, "I told you that you can't call this command less than every 10 seconds!").await.unwrap();
+  msg.reply(ctx, "Você já recebeu sua recompensa, pode receber apenas a cada 5 minutos!").await.unwrap();
 }
