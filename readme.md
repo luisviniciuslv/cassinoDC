@@ -8,11 +8,14 @@ Este repositório documenta meu aprendizado em Rust através da criação de um 
 
 * **Comandos básicos:**
   * `!profile [@mention], !p [@mention]`: Ver seu perfil ou perfil do usuário mencionado.
-  * `!add_coins @mention`: administrador pode adicionar coins a algum usuário.
-  * 
+  * `!rec`: Recuperar recompensa periódica para poder apostar coins
+    
 * **Jogos:**
-  * `impar ou par`
-
+  * `/poi (par ou impar) (valor da aposta)`: Gerar um número aleatório, caso seja um número de sua escolha, ganha baseado na sua aposta.
+ 
+* **Comandos de Admin:**
+  * `!add_coins @mention`: administrador pode adicionar coins a algum usuário.
+  
 ### Por que Rust?
 
 Rust é uma linguagem moderna que oferece segurança, performance e controle. Aprender Rust pode abrir portas para diversas áreas de desenvolvimento.
