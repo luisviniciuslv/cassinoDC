@@ -10,7 +10,6 @@ use serenity::prelude::*;
 
 #[command]
 #[aliases("p")]
-#[bucket = "req"]
 pub async fn profile(ctx: &Context, msg: &Message,  mut args: Args) -> Result<(), Box<dyn Error + Send + Sync>> {
   let mention = args.single::<String>().unwrap_or_default();
 
