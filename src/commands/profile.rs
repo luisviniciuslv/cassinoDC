@@ -1,30 +1,16 @@
-use std::error::Error;
+use poise::{serenity_prelude::{CreateEmbed, CreateEmbedFooter, User, Timestamp}, CreateReply};
 
-use serenity::framework::standard::macros::command;
+use crate::{Context, Error};
+
 use crate::db::get_user;
-use serenity::framework::standard::Args;
 
-use serenity::builder::{CreateEmbed, CreateEmbedFooter, CreateMessage};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
+#[poise::command(slash_command)]
+pub async fn profile(ctx: Context<'_>, 
+#[description = "Caso queira ver o perfil de algum usuário, mencione-o."]
+user: Option<User>) -> Result<(), Error> {
+  let user = user.unwrap_or_else(|| ctx.author().clone());
 
-#[command]
-#[aliases("p")]
-pub async fn profile(ctx: &Context, msg: &Message,  mut args: Args) -> Result<(), Box<dyn Error + Send + Sync>> {
-  let mention = args.single::<String>().unwrap_or_default();
-
-  let user_id;
-  let user;
-
-  if mention.is_empty() {
-    user_id = msg.author.id.to_string();
-    user = msg.author.clone();
-  } else {
-    user_id = mention.replace("<@", "").replace(">", "").replace("!", "").replace(" ", "");
-    user = msg.guild_id.unwrap().member(&ctx.http, UserId::new(user_id.parse::<u64>().unwrap())).await?.user;
-  }
-
-  let user_db = get_user(&user_id).await?;
+  let user_db = get_user(&user.id.to_string()).await?;
   let footer = CreateEmbedFooter::new("ヾ(￣▽￣)").icon_url(user.face());
 
   let embed = CreateEmbed::new()
@@ -34,14 +20,12 @@ pub async fn profile(ctx: &Context, msg: &Message,  mut args: Args) -> Result<()
     .footer(footer)
     .timestamp(Timestamp::now());
 
-  let builder = CreateMessage::new()
-    .embed(embed);
+    ctx.send(CreateReply {
+      embeds: vec![embed],
+      ..Default::default()
+  })
+  .await
+  .unwrap();
 
-  let msg = msg.channel_id.send_message(&ctx.http, builder).await;
-
-  if let Err(why) = msg {
-    println!("Error sending message: {why:?}");
-  }
-
-    Ok(())
+  Ok(())
 }

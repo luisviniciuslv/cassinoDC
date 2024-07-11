@@ -1,18 +1,19 @@
-use serenity::all::standard::Args;
-use serenity::prelude::*;
+use poise::CreateReply;
 
-
-use serenity::{all::Message, framework::standard::macros::command};
 use crate::db::{update_coins, atualize_last_reward};
+use crate::{Context, Error};
 
-#[command]
-#[bucket = "req"]
-pub async fn rec(ctx: &Context, msg: &Message, _: Args) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let user_id = msg.author.id.to_string();
-
-    let _ = update_coins(&user_id, 100).await.expect("?");
-    let _ = atualize_last_reward(&user_id).await.expect("?");
-
-    msg.channel_id.say(&ctx.http, "Você recebeu 100 coins!").await?;
+#[poise::command(slash_command)]
+pub async fn rec(ctx: Context<'_>) -> Result<(), Error> {
+    let user = ctx.author();
+    let _ = update_coins(&user.id.to_string(), 100).await.expect("?");
+    let _ = atualize_last_reward(&user.id.to_string()).await.expect("?");
+    let message = String::from("Você recebeu 100 coins! Use o comando /profile para ver seu saldo.");
+    ctx.send(
+        CreateReply {
+            content: Some(message),
+            ..Default::default()
+        },
+    ).await?;
     Ok(())
 }
